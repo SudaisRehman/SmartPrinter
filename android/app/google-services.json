@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "917388836106",
+    "project_id": "smart-printer-techsole",
+    "storage_bucket": "smart-printer-techsole.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:917388836106:android:5b7b551544c5a32736cef3",
+        "android_client_info": {
+          "package_name": "com.example.printer_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDi2RUVxT2hV-dmPCyy5Ymgbpfio8IJ5IE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
