@@ -735,14 +735,14 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
 
                                           return AlertDialog(
                                             title: Text(
-                                              'Print Photo',
+                                              'Print Document',
                                               style: TextStyle(
                                                 fontSize: 19,
                                                 color: Colors.black,
                                               ),
                                             ),
                                             content: Text(
-                                              'Would you like to watch an ad to print this photo?',
+                                              'Would you like to watch an ad to print this document?',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: Colors.black,
@@ -816,14 +816,14 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
 
                                           return AlertDialog(
                                             title: Text(
-                                              'Print Photo',
+                                              'Print Web Page',
                                               style: TextStyle(
                                                 fontSize: 19,
                                                 color: Colors.black,
                                               ),
                                             ),
                                             content: Text(
-                                              'Would you like to watch an ad to print this photo?',
+                                              'Would you like to watch an ad to print this web page?',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: Colors.black,
