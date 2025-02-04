@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 import 'package:file_picker/file_picker.dart';
@@ -63,7 +64,8 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
   final TextEditingController maxHeightController = TextEditingController();
   final TextEditingController qualityController = TextEditingController();
   final TextEditingController limitController = TextEditingController();
-
+  RewardedAd? _rewardedAd;
+  bool _isAdLoaded = false;
   Future<void>? _launched;
 
   Widget bigCircle = Positioned(
@@ -356,6 +358,7 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
     if (adConfig.interstitialHome) {
       _loadInterstitialAd();
     }
+    _loadRewardedAd();
     // _loadInterstitialAd();
   }
 
@@ -421,6 +424,58 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
     } else {
       print('Tapp Interstitial ad not loaded yet.');
     }
+  }
+
+  void _loadRewardedAd() {
+    RewardedAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/5224354917',
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        onAdLoaded: (ad) {
+          _rewardedAd = ad;
+          _isAdLoaded = true;
+        },
+        onAdFailedToLoad: (error) {
+          print('RewardedAd failed to load: $error');
+        },
+      ),
+    );
+  }
+
+  void _showRewardedAd(int index) {
+    if (_isAdLoaded) {
+      _rewardedAd?.show(
+        onUserEarnedReward: (AdWithoutView ad, RewardItem reward) {
+          print('User earned reward: ${reward.amount} ${reward.type}');
+          // _downloadImage(); // Proceed with the download after the ad
+          index == 0
+              ? _onPickImage(ImageSource.gallery, context)
+              : index == 1
+                  ? _openPdf()
+                  : Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => PrintWebPageScreen(),
+                      ),
+                    );
+
+          // _onPickImage(ImageSource.gallery, context);
+        },
+      );
+      _rewardedAd = null; // Dispose of the rewarded ad
+      _loadRewardedAd(); // Load a new rewarded ad for the next use
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Ad not ready. Please try again later.')),
+      );
+    }
+  }
+
+  void _showAd(int index) {
+    if (_isAdLoaded) {
+      _showRewardedAd(index);
+    }
+    // _downloadImage();
   }
 
   @override
@@ -568,7 +623,80 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
                             setState(() {
                               switch (index) {
                                 case 0: // print photo
-                                  _onPickImage(ImageSource.gallery, context);
+                                  int _timerSeconds = 5;
+
+                                  Timer? timer;
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (context, setState) {
+                                          timer ??= Timer.periodic(
+                                              const Duration(seconds: 1),
+                                              (timer) {
+                                            if (_timerSeconds > 1) {
+                                              setState(() {
+                                                _timerSeconds--;
+                                              });
+                                            } else {
+                                              timer.cancel();
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              }
+                                              _showAd(
+                                                  0); // Uncomment this to show the ad after dialog closes
+                                            }
+                                          });
+
+                                          return AlertDialog(
+                                            title: Text(
+                                              'Print Photo',
+                                              style: TextStyle(
+                                                fontSize: 19,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            content: Text(
+                                              'Would you like to watch an ad to print this photo?',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                child: Text(
+                                                  'No Thanks',
+                                                  style: TextStyle(
+                                                      color: Colors.blue,
+                                                      fontSize: 12),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              SizedBox(width: 30),
+                                              TextButton(
+                                                child: Text(
+                                                  'Ad Start in $_timerSeconds',
+                                                  style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 12),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                  _showAd(0);
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
+                                  // _onPickImage(ImageSource.gallery, context);
                                   break;
                                 case 1: // print document
                                   /*
@@ -578,20 +706,167 @@ class _PrintDashboardWidgetState extends State<PrintDashboardWidget> {
                                       builder: (context) => const NotesView()),
                                 );
                               */
-                                  _openPdf();
+                                  int _timerSeconds = 5;
+
+                                  Timer? timer;
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (context, setState) {
+                                          timer ??= Timer.periodic(
+                                              const Duration(seconds: 1),
+                                              (timer) {
+                                            if (_timerSeconds > 1) {
+                                              setState(() {
+                                                _timerSeconds--;
+                                              });
+                                            } else {
+                                              timer.cancel();
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              }
+                                              _showAd(
+                                                  1); // Uncomment this to show the ad after dialog closes
+                                            }
+                                          });
+
+                                          return AlertDialog(
+                                            title: Text(
+                                              'Print Photo',
+                                              style: TextStyle(
+                                                fontSize: 19,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            content: Text(
+                                              'Would you like to watch an ad to print this photo?',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                child: Text(
+                                                  'No Thanks',
+                                                  style: TextStyle(
+                                                      color: Colors.blue,
+                                                      fontSize: 12),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              SizedBox(width: 30),
+                                              TextButton(
+                                                child: Text(
+                                                  'Ad Start in $_timerSeconds',
+                                                  style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 12),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                  _showAd(1);
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  );
+
+                                  // _openPdf();
                                   break;
                                 case 2: // print Web page
                                   // navigateToWebPage("Web Page");
-                                  _handleTap();
+                                  // _handleTap();
                                   /** Render Web Page **/
                                   /**/
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) =>
-                                          PrintWebPageScreen(),
-                                    ),
+                                  int _timerSeconds = 5;
+
+                                  Timer? timer;
+
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return StatefulBuilder(
+                                        builder: (context, setState) {
+                                          timer ??= Timer.periodic(
+                                              const Duration(seconds: 1),
+                                              (timer) {
+                                            if (_timerSeconds > 1) {
+                                              setState(() {
+                                                _timerSeconds--;
+                                              });
+                                            } else {
+                                              timer.cancel();
+                                              if (Navigator.canPop(context)) {
+                                                Navigator.of(context)
+                                                    .pop(); // Close the dialog
+                                              }
+                                              _showAd(
+                                                  2); // Uncomment this to show the ad after dialog closes
+                                            }
+                                          });
+
+                                          return AlertDialog(
+                                            title: Text(
+                                              'Print Photo',
+                                              style: TextStyle(
+                                                fontSize: 19,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            content: Text(
+                                              'Would you like to watch an ad to print this photo?',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: Colors.black,
+                                              ),
+                                            ),
+                                            actions: [
+                                              TextButton(
+                                                child: Text(
+                                                  'No Thanks',
+                                                  style: TextStyle(
+                                                      color: Colors.blue,
+                                                      fontSize: 12),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              SizedBox(width: 30),
+                                              TextButton(
+                                                child: Text(
+                                                  'Ad Start in $_timerSeconds',
+                                                  style: TextStyle(
+                                                      color: Colors.grey,
+                                                      fontSize: 12),
+                                                ),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                  _showAd(2);
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
                                   );
+                                  // Navigator.push(
+                                  //   context,
+                                  //   MaterialPageRoute(
+                                  //     builder: (context) =>
+                                  //         PrintWebPageScreen(),
+                                  //   ),
+                                  // );
 
                                   /** Render Web Page **/
                                   // Navigator.push(
