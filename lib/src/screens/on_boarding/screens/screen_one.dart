@@ -24,7 +24,7 @@ class _ScreenOneState extends State<ScreenOne> {
     super.initState();
     final adConfig = Provider.of<AdConfigProvider>(context, listen: false);
     if (adConfig.nativeOnboarding1_2) {
-      _initializeNativeAd();
+      // _initializeNativeAd();
     }
   }
 
@@ -121,20 +121,6 @@ class _ScreenOneState extends State<ScreenOne> {
             SizedBox(height: 180.h),
 
             /// Display shimmer or native ad dynamically
-            if (adConfig.nativeOnboarding1_2)
-              isNativeAdLoaded
-                  ? AdmobEasyNative.smallTemplate(
-                      minWidth: 320,
-                      minHeight: 50,
-                      maxWidth: 400,
-                      maxHeight: 85,
-                      onAdClicked: (ad) => print("Ad Clicked"),
-                      onAdImpression: (ad) => print("Ad Impression Logged"),
-                      onAdClosed: (ad) => print("Ad Closed"),
-                    )
-                  : ShimmerLoadingBanner(height: 100, width: double.infinity)
-            else
-              Container(),
           ],
         ),
       ),

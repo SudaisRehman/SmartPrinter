@@ -9,6 +9,7 @@ import 'package:printer_app/src/screens/on_boarding/screens/screen_one.dart';
 import 'package:printer_app/src/screens/on_boarding/screens/screen_three.dart';
 import 'package:printer_app/src/screens/on_boarding/screens/screen_two.dart';
 import 'package:printer_app/src/utils/sizer/sizer.dart';
+import 'package:printer_app/src/widgets/ShimmerAd/ShimmerAd.dart';
 import 'package:printer_app/src/widgets/subscription_widget.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -37,6 +38,28 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   void initState() {
     super.initState();
     // _loadNativeAd();
+    final adConfig = Provider.of<AdConfigProvider>(context, listen: false);
+    if (adConfig.nativeOnboarding1_2) {
+      _initializeNativeAd();
+    }
+  }
+
+  void _initializeNativeAd() async {
+    final adConfig = Provider.of<AdConfigProvider>(context, listen: false);
+    AdmobEasy.instance.initialize(
+      androidNativeAdID: adConfig.nativeOnboarding1_2Id, // Test Ad ID
+    );
+
+    // Simulating ad load delay (Ad loading happens asynchronously)
+    await Future.delayed(const Duration(seconds: 2));
+
+    // Update the state to simulate the ad being loaded
+    if (mounted) {
+      setState(() {
+        isNativeAdLoaded = true; // Simulating successful ad load
+      });
+    }
+    print('Native Ad loaded');
   }
 
   @override
@@ -44,6 +67,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     final onBoardingProvider = Provider.of<OnBoardingProvider>(context);
     final adConfigProvider =
         Provider.of<AdConfigProvider>(context, listen: false);
+    final adConfig = Provider.of<AdConfigProvider>(context, listen: false);
     final localization = AppLocalizations.of(context)!;
 
     return SafeArea(
@@ -59,36 +83,6 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
           child: Stack(
             // crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 20.w).copyWith(top: 20.h),
-                child: InkWell(
-                  onTap: () async {
-                    SharedPreferences prefs =
-                        await SharedPreferences.getInstance();
-                    await prefs.setBool('isTrue', true);
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomeWidget(),
-                      ),
-                    );
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      localization.skip,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontWeight: FontWeight.w400,
-                        fontSize: 14.fontSize,
-                        color: AppColor.blackColor,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
               Container(
                 child: PageView(
                   controller: onBoardingProvider.pageController,
@@ -165,7 +159,81 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                 ),
               ),
               SizedBox(height: 40.h),
+              isNativeAdLoaded && adConfig.nativeOnboarding1_2
+                  ? Positioned(
+                      bottom: 0,
+                      left: 5,
+                      right: 5,
+                      child: AdmobEasyNative.smallTemplate(
+                        minWidth: 320,
+                        minHeight: 50,
+                        maxWidth: 400,
+                        maxHeight: 85,
+                        onAdClicked: (ad) => print("Ad Clicked"),
+                        onAdImpression: (ad) => print("Ad Impression Logged"),
+                        onAdClosed: (ad) => print("Ad Closed"),
+                      ),
+                    )
+                  : adConfig.nativeOnboarding1_2
+                      ? Positioned(
+                          bottom: 0,
+                          left: 5,
+                          right: 5,
+                          child: ShimmerLoadingBanner(height: 85, width: 350.w))
+                      : Container(),
 
+              Padding(
+                padding:
+                    EdgeInsets.symmetric(horizontal: 20.w).copyWith(top: 20.h),
+                child: InkWell(
+                  onTap: () async {
+                    print('Skip');
+                    // SharedPreferences prefs =
+                    //     await SharedPreferences.getInstance();
+                    // await prefs.setBool('isTrue', true);
+                    // Navigator.pushReplacement(
+                    //   context,
+                    //   MaterialPageRoute(
+                    //     builder: (context) => HomeWidget(),
+                    //   ),
+                    // );
+                    SharedPreferences prefs =
+                        await SharedPreferences.getInstance();
+                    await prefs.setBool('isTrue', true);
+                    if (!adConfigProvider.isSubscribed) {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SubscriptionPage(),
+                        ),
+                      );
+                    } else {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setBool('isTrue', true);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeWidget(),
+                        ),
+                      );
+                    }
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      localization.skip,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontWeight: FontWeight.w400,
+                        fontSize: 14.fontSize,
+                        color: AppColor.blackColor,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               // Container(
               //   height: 80.h,
               //   width: double.infinity,

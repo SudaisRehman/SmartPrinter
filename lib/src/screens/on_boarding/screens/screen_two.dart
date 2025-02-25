@@ -23,7 +23,7 @@ class _ScreenTwoState extends State<ScreenTwo> {
     super.initState();
     final adConfig = Provider.of<AdConfigProvider>(context, listen: false);
     if (adConfig.nativeOnboarding1_2) {
-      _initializeNativeAd();
+      // _initializeNativeAd();
     }
     // _initializeNativeAd();
   }
@@ -91,19 +91,6 @@ class _ScreenTwoState extends State<ScreenTwo> {
               ),
             ),
             SizedBox(height: 180.h),
-            isNativeAdLoaded && adConfig.nativeOnboarding1_2
-                ? AdmobEasyNative.smallTemplate(
-                    minWidth: 320,
-                    minHeight: 50,
-                    maxWidth: 400,
-                    maxHeight: 85,
-                    onAdClicked: (ad) => print("Ad Clicked"),
-                    onAdImpression: (ad) => print("Ad Impression Logged"),
-                    onAdClosed: (ad) => print("Ad Closed"),
-                  )
-                : adConfig.nativeOnboarding1_2
-                    ? ShimmerLoadingBanner(height: 85, width: 350.w)
-                    : Container(),
           ],
         ),
       ),

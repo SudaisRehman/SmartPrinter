@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:in_app_purchase/in_app_purchase.dart';
 import 'package:printer_app/src/screens/home_widget.dart';
 import 'package:provider/provider.dart';
@@ -20,26 +21,21 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
   final Map<String, List<String>> subscriptionNotes = {
     "Weekly": [
       "The user and auto renewal may manage subscription that may be turned off by going to the  user’s account settings after purchase",
-      "The user and auto renewal may manage subscription that may be turned off by going to the  user’s account settings after purchase",
-      "The user and auto renewal may manage subscription that may be turned off by going to the  user’s account settings after purchase",
-      "Any unused portion of a free trial period, if offered, will be forfeited when the user purchase a subscription to that publication, where applicable.",
-      "Account will be charged for renewal within  24 hours before the end of the current period, and identify the renewal cost."
+      "Subscription automatically renews unless auto renew is turned-off at least 24 hours before the end of the current period.",
+      "Payment will be charged to the iTunes accounts at confirmation of purchase.",
+      "Account will be charged for renewal within  24 hours before the end of the current period, and identify the renewal cost.",
     ],
     "Monthly": [
-      "Trails start on September 22, 2024, and end on September 28, 2024.",
-      "Due amount today: \$0.00.",
-      "Google will notify you before the trial ends.",
-      "You can cancel anytime before the trial ends to avoid being charged.",
-      "After the trial ends, you will be automatically charged \$12.99 every month.",
-      "The subscription auto-renews and you can cancel it anytime.",
-      "To manage or cancel your subscription, go to your Google Play Store account > Payments and subscriptions > Subscriptions.",
-      "Limited usage of the app is available without a subscription.",
+      "The user and auto renewal may manage subscription that may be turned off by going to the  user’s account settings after purchase",
+      "Subscription automatically renews unless auto renew is turned-off at least 24 hours before the end of the current period.",
+      "Payment will be charged to the iTunes accounts at confirmation of purchase.",
+      "Account will be charged for renewal within  24 hours before the end of the current period, and identify the renewal cost.",
     ],
     "Yearly": [
-      "You will be charged \$99.99 every year.",
-      "The subscription auto-renews and you can cancel it anytime.",
-      "To manage or cancel your subscription, go to your Google Play Store account > Payments and subscriptions > Subscriptions.",
-      "Limited usage of the app is available without a subscription.",
+      "The user and auto renewal may manage subscription that may be turned off by going to the  user’s account settings after purchase",
+      "Subscription automatically renews unless auto renew is turned-off at least 24 hours before the end of the current period.",
+      "Payment will be charged to the iTunes accounts at confirmation of purchase.",
+      "Account will be charged for renewal within  24 hours before the end of the current period, and identify the renewal cost.",
     ],
   };
 
@@ -48,6 +44,43 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
     super.initState();
     _inAppPurchase = InAppPurchase.instance;
     _initPurchase();
+    _loadInterstitialAd();
+  }
+
+  InterstitialAd? _interstitialAd;
+  bool isInterstitialAdLoaded = false;
+
+  void _loadInterstitialAd() async {
+    final adConfig = Provider.of<AdConfigProvider>(context, listen: false);
+    await adConfig.initializeRemoteConfig();
+    // await Future.delayed(Duration(seconds: 2));
+    await InterstitialAd.load(
+      adUnitId: adConfig.splashInterstitialId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (InterstitialAd ad) {
+          setState(() {
+            _interstitialAd = ad;
+            isInterstitialAdLoaded = true;
+          });
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (InterstitialAd ad) {
+              ad.dispose();
+              _loadInterstitialAd(); // Load a new interstitial ad
+            },
+            onAdFailedToShowFullScreenContent: (Ad ad, AdError error) {
+              ad.dispose(); // Dispose if it fails to show
+              _loadInterstitialAd(); // Load a new interstitial ad
+            },
+          );
+        },
+        onAdFailedToLoad: (LoadAdError error) {
+          print('Failed to load interstitial ad: $error');
+          isInterstitialAdLoaded = false;
+          // Retry loading the ad after a delay or log the error
+        },
+      ),
+    );
   }
 
   Future<void> _initPurchase() async {
@@ -126,27 +159,7 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   SizedBox(height: 16),
-                  // Row(
-                  //   mainAxisAlignment: MainAxisAlignment.start,
-                  //   children: [
-                  //     InkWell(
-                  //       onTap: () {
-                  //         // adConfig.updateSubscriptionStatus(true);
-                  //         Navigator.pushReplacement(
-                  //           context,
-                  //           MaterialPageRoute(
-                  //             builder: (context) => HomeWidget(),
-                  //           ),
-                  //         );
-                  //       },
-                  //       child: Icon(
-                  //         Icons.cancel,
-                  //         color: Colors.grey.withOpacity(.5),
-                  //         size: 30,
-                  //       ),
-                  //     ),
-                  //   ],
-                  // ),
+
                   Text(
                     "SMART PRINTER",
                     textAlign: TextAlign.center,
@@ -175,25 +188,25 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     child: Row(
                       children: [
                         ScrollWidget(
-                          iconpath: "icons/connectprinter.svg",
+                          iconpath: 'icons/connectprinter.png',
                           boldtext: "Connect to",
                           normaltext: "all printers",
                         ),
                         SizedBox(width: 10),
                         ScrollWidget(
-                          iconpath: "icons/unlimetdprint.svg",
+                          iconpath: "icons/unlimitedprinter.png",
                           boldtext: "Unlimited",
                           normaltext: "Printables",
                         ),
                         SizedBox(width: 10),
                         ScrollWidget(
-                          iconpath: 'icons/noads.svg',
+                          iconpath: 'icons/noads.png',
                           boldtext: "Ad Free",
                           normaltext: "Version",
                         ),
                         SizedBox(width: 10),
                         ScrollWidget(
-                          iconpath: 'icons/printephotos.svg',
+                          iconpath: 'icons/printphotos.png',
                           boldtext: "Print Photos",
                           normaltext: "& labels",
                         ),
@@ -201,14 +214,25 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
                     ),
                   ),
                   SizedBox(height: 10),
-                  Text('Continue with free trial',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.black,
-                        fontWeight: FontWeight.w700,
-                        fontFamily: 'popins',
-                        decoration: TextDecoration.underline,
-                      )),
+                  // InkWell(
+                  //   onTap: () {
+                  //     // adConfig.updateSubscriptionStatus(true);
+                  //     Navigator.pushReplacement(
+                  //       context,
+                  //       MaterialPageRoute(
+                  //         builder: (context) => HomeWidget(),
+                  //       ),
+                  //     );
+                  //   },
+                  //   child: Text('Continue with free trial',
+                  //       style: TextStyle(
+                  //         fontSize: 12,
+                  //         color: Colors.black,
+                  //         fontWeight: FontWeight.w700,
+                  //         fontFamily: 'popins',
+                  //         decoration: TextDecoration.underline,
+                  //       )),
+                  // ),
                   SizedBox(height: 10),
 
                   Column(
@@ -253,6 +277,39 @@ class _SubscriptionPageState extends State<SubscriptionPage> {
 
                   SizedBox(height: 10),
                   ..._buildNotes(),
+                ],
+              ),
+            ),
+            Positioned(
+              top: 25,
+              right: 10,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  // SvgPicture.asset(
+                  //   "icons/new/connectprinter.svg",
+                  //   width: 30,
+                  //   height: 30,
+                  // ),
+                  InkWell(
+                    onTap: () {
+                      if (isInterstitialAdLoaded && _interstitialAd != null) {
+                        _interstitialAd!.show();
+                      }
+                      // adConfig.updateSubscriptionStatus(true);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomeWidget(),
+                        ),
+                      );
+                    },
+                    child: Icon(
+                      Icons.cancel,
+                      color: Colors.white,
+                      size: 30,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -501,7 +558,7 @@ class ScrollWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 105,
+      width: 110,
       height: 45,
       decoration: BoxDecoration(
         color: Colors.white,
@@ -512,10 +569,10 @@ class ScrollWidget extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SvgPicture.asset(
+            Image.asset(
               iconpath,
-              width: 20,
-              height: 20,
+              width: 30,
+              height: 30,
             ),
             SizedBox(width: 10),
             Column(

@@ -23,7 +23,7 @@ class _ScreenFourState extends State<ScreenFour> {
 
     super.initState();
     if (adConfig.nativeOnboarding4) {
-      _initializeNativeAd();
+      // _initializeNativeAd();
     }
     // _initializeNativeAd();
   }
@@ -96,19 +96,19 @@ class _ScreenFourState extends State<ScreenFour> {
                     ),
                   ),
                   SizedBox(height: 180.h),
-                  isNativeAdLoaded && adConfig.nativeOnboarding4
-                      ? AdmobEasyNative.smallTemplate(
-                          minWidth: 320,
-                          minHeight: 50,
-                          maxWidth: 400,
-                          maxHeight: 85,
-                          onAdClicked: (ad) => print("Ad Clicked"),
-                          onAdImpression: (ad) => print("Ad Impression Logged"),
-                          onAdClosed: (ad) => print("Ad Closed"),
-                        )
-                      : adConfig.nativeOnboarding4
-                          ? ShimmerLoadingBanner(height: 85, width: 350.w)
-                          : SizedBox.shrink(),
+                  // isNativeAdLoaded && adConfig.nativeOnboarding4
+                  //     ? AdmobEasyNative.smallTemplate(
+                  //         minWidth: 320,
+                  //         minHeight: 50,
+                  //         maxWidth: 400,
+                  //         maxHeight: 85,
+                  //         onAdClicked: (ad) => print("Ad Clicked"),
+                  //         onAdImpression: (ad) => print("Ad Impression Logged"),
+                  //         onAdClosed: (ad) => print("Ad Closed"),
+                  //       )
+                  //     : adConfig.nativeOnboarding4
+                  //         ? ShimmerLoadingBanner(height: 85, width: 350.w)
+                  //         : SizedBox.shrink(),
                 ],
               ),
             ),
